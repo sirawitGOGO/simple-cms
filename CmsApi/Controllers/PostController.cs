@@ -34,9 +34,7 @@ public class PostController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PostDto>> Create(CreatePostDto dto)
     {
-        var userIdClaim = User.FindFirstValue("UserId")
-            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdClaim, out var userId))
+        if (!TryGetCurrentUserId(out var userId))
         {
             return Unauthorized();
         }
@@ -53,14 +51,31 @@ public class PostController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<PostDto>> Update(Guid id, UpdatePostDto dto)
     {
-        var post = await _postService.UpdateAsync(id, dto);
+        if (!TryGetCurrentUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var post = await _postService.UpdateAsync(id, dto, userId);
         return post is null ? NotFound() : Ok(post);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var deleted = await _postService.DeleteAsync(id);
+        if (!TryGetCurrentUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var deleted = await _postService.DeleteAsync(id, userId);
         return deleted ? NoContent() : NotFound();
+    }
+
+    private bool TryGetCurrentUserId(out Guid userId)
+    {
+        var userIdClaim = User.FindFirstValue("UserId")
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userIdClaim, out userId);
     }
 }

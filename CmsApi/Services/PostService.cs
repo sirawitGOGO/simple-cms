@@ -49,9 +49,10 @@ public class PostService
         return ToDto(post);
     }
 
-    public async Task<PostDto?> UpdateAsync(Guid id, UpdatePostDto dto)
+    public async Task<PostDto?> UpdateAsync(Guid id, UpdatePostDto dto, Guid userId)
     {
-        var post = await _dbContext.Posts.SingleOrDefaultAsync(post => post.Id == id);
+        var post = await _dbContext.Posts
+            .SingleOrDefaultAsync(post => post.Id == id && post.UserId == userId);
         if (post is null)
         {
             return null;
@@ -63,9 +64,10 @@ public class PostService
         return ToDto(post);
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id, Guid userId)
     {
-        var post = await _dbContext.Posts.SingleOrDefaultAsync(post => post.Id == id);
+        var post = await _dbContext.Posts
+            .SingleOrDefaultAsync(post => post.Id == id && post.UserId == userId);
         if (post is null)
         {
             return false;
