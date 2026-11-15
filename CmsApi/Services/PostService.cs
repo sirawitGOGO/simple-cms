@@ -18,6 +18,7 @@ public class PostService
     {
         return await _dbContext.Posts
             .AsNoTracking()
+            .Include(post => post.User)
             .OrderByDescending(post => post.CreatedAt)
             .Select(post => ToDto(post))
             .ToListAsync();
@@ -26,13 +27,15 @@ public class PostService
     public async Task<PostDto?> GetByIdAsync(Guid id)
     {
         var post = await _dbContext.Posts.AsNoTracking()
+            .Include(post => post.User)
             .SingleOrDefaultAsync(post => post.Id == id);
         return post is null ? null : ToDto(post);
     }
 
     public async Task<PostDto?> CreateAsync(CreatePostDto dto, Guid userId)
     {
-        if (!await _dbContext.Users.AnyAsync(user => user.Id == userId))
+        var user = await _dbContext.Users.SingleOrDefaultAsync(user => user.Id == userId);
+        if (user is null)
         {
             return null;
         }
@@ -41,7 +44,8 @@ public class PostService
         {
             Title = dto.Title.Trim(),
             Content = dto.Content,
-            UserId = userId
+            UserId = userId,
+            User = user
         };
 
         _dbContext.Posts.Add(post);
@@ -52,6 +56,7 @@ public class PostService
     public async Task<PostDto?> UpdateAsync(Guid id, UpdatePostDto dto, Guid userId)
     {
         var post = await _dbContext.Posts
+            .Include(post => post.User)
             .SingleOrDefaultAsync(post => post.Id == id && post.UserId == userId);
         if (post is null)
         {
@@ -84,6 +89,6 @@ public class PostService
         Title = post.Title,
         Content = post.Content,
         CreatedAt = post.CreatedAt,
-        UserId = post.UserId
+        Username = post.User.Username,
     };
 }
