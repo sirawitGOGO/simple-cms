@@ -7,11 +7,14 @@ import { CreatePostDto, Post, UpdatePostDto } from '../models/post.model';
 @Injectable({ providedIn: 'root' })
 export class PostService {
   private readonly http = inject(HttpClient);
-  private readonly apiBaseUrl = environment.apiBaseUrl.replace(/\/$/, '').replace(/\/api$/, '');
-  private readonly postsUrl = `${this.apiBaseUrl}/api/post`;
+  private readonly postsUrl = `${environment.apiBaseUrl}/post`;
 
   getPosts(): Observable<Post[]> {
     return this.http.get<Post[]>(this.postsUrl);
+  }
+
+  getPost(id: number): Observable<Post> {
+    return this.http.get<Post>(`${this.postsUrl}/${id}`);
   }
 
   createPost(dto: CreatePostDto): Observable<Post> {

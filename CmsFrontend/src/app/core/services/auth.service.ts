@@ -7,7 +7,7 @@ import { LoginRequest, RegisterRequest, UserProfile } from '../models/auth.model
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly authUrl = `${environment.apiBaseUrl.replace(/\/api\/?$/, '')}/api/auth`;
+  private readonly authUrl = `${environment.apiBaseUrl}/auth`;
   readonly currentUser = signal<UserProfile | null>(null);
 
   register(data: RegisterRequest): Observable<void> {

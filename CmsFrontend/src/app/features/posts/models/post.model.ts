@@ -3,8 +3,7 @@ export interface Post {
   title: string;
   content: string;
   createdAt: string | Date;
-  authorName?: string;
-  username?: string;
+  username: string;
 }
 
 export interface CreatePostDto {
